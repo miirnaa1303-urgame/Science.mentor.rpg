@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Science Mentor RPG — Science Rangers 2055</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-0:#050912;
+  --bg-1:#0a1526;
+  --bg-2:#0f2038;
+  --cyan:#39e8c9;
+  --cyan-dim:rgba(57,232,201,0.25);
+  --green:#6be37a;
+  --amber:#ffc24b;
+  --coral:#ff6b6b;
+  --ice:#eaf4f6;
+  --dim:#8ea6bb;
+  --glass:rgba(15,32,56,0.55);
+  --glass-strong:rgba(15,32,56,0.82);
+  --border:rgba(97,220,201,0.22);
+  --radius:18px;
+  font-family:'Rajdhani',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:
+    radial-gradient(ellipse 900px 600px at 15% -10%, rgba(57,232,201,0.10), transparent 60%),
+    radial-gradient(ellipse 900px 700px at 90% 10%, rgba(107,227,122,0.08), transparent 55%),
+    linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
+  color:var(--ice);
+  min-height:100vh;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.5;
+  background-image:radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size:26px 26px;
+}
+h1,h2,h3,.display{font-family:'Orbitron',sans-serif;letter-spacing:0.02em;}
+.screen{display:none;position:relative;z-index:1;min-height:100vh;}
+.screen.active{display:block;animation:fadeIn .5s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--cyan-dim);border-radius:8px;}
+
+.glass{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  box-shadow:0 8px 32px rgba(0,0,0,0.35);
+}
+button{font-family:'Rajdhani',sans-serif;cursor:pointer;border:none;}
+.btn{
+  padding:12px 22px;border-radius:12px;font-weight:700;font-size:15px;letter-spacing:0.03em;
+  background:linear-gradient(135deg,var(--cyan),#1fb894);color:#04160f;transition:transform .15s, box-shadow .15s;
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(57,232,201,0.35);}
+.btn:active{transform:translateY(0);}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--ice);}
+.btn.ghost:hover{background:rgba(57,232,201,0.08);}
+.btn.amber{background:linear-gradient(135deg,var(--amber),#e0932a);color:#2b1900;}
+.btn.small{padding:8px 14px;font-size:13px;border-radius:9px;}
+.btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;box-shadow:none;}
+input,textarea,select{
+  font-family:'Rajdhani',sans-serif;background:rgba(6,14,26,0.6);border:1px solid var(--border);
+  color:var(--ice);border-radius:10px;padding:10px 14px;font-size:15px;width:100%;outline:none;
+}
+input:focus,textarea:focus{border-color:var(--cyan);}
+textarea{resize:vertical;min-height:80px;line-height:1.4;}
+.pill{padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.04em;background:rgba(57,232,201,0.12);border:1px solid var(--border);color:var(--cyan);}
+
+/* ============ LOGIN ============ */
+#screen-login{display:flex;align-items:center;justify-content:center;padding:24px;}
+.login-wrap{width:100%;max-width:480px;padding:36px;text-align:center;}
+.logo-orbit{width:86px;height:86px;margin:0 auto 14px;position:relative;}
+.logo-orbit svg{width:100%;height:100%;animation:spin 12s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.login-wrap h1{font-size:26px;background:linear-gradient(90deg,var(--cyan),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.login-wrap p.sub{color:var(--dim);margin-top:6px;font-size:14px;letter-spacing:.08em;text-transform:uppercase;}
+.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:26px 0 18px;}
+.role-card{padding:16px 8px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,0.02);transition:all .2s;}
+.role-card:hover{border-color:var(--cyan);background:rgba(57,232,201,0.07);}
+.role-card.active{border-color:var(--cyan);background:rgba(57,232,201,0.14);box-shadow:0 0 0 1px var(--cyan) inset;}
+.role-card .ic{font-size:26px;margin-bottom:6px;}
+.role-card .lbl{font-size:13px;font-weight:600;}
+.login-form{display:flex;flex-direction:column;gap:12px;text-align:left;margin-top:10px;}
+.login-alt{display:flex;gap:10px;margin-top:14px;}
+.login-alt button{flex:1;}
+.login-note{margin-top:16px;font-size:12px;color:var(--dim);line-height:1.5;}
+
+/* ============ HUD ============ */
+#hud{
+  position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:14px;
+  padding:10px 18px;background:var(--glass-strong);border-bottom:1px solid var(--border);backdrop-filter:blur(16px);
+  flex-wrap:wrap;
+}
+.hud-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),var(--green));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.hud-name{font-weight:700;font-size:14px;}
+.hud-rank{font-size:11px;color:var(--dim);}
+.hud-stat{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;}
+.hud-stat .bar-bg{width:80px;height:7px;border-radius:8px;background:rgba(255,255,255,0.08);overflow:hidden;}
+.hud-stat .bar-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width .4s ease;}
+.hud-nav{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}
+.hud-nav button{padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;background:transparent;color:var(--dim);border:1px solid transparent;}
+.hud-nav button.active{color:var(--cyan);border-color:var(--border);background:rgba(57,232,201,0.08);}
+.hud-nav button:hover{color:var(--ice);}
+
+/* ============ DASHBOARD ============ */
+.container{max-width:1180px;margin:0 auto;padding:26px 18px 80px;position:relative;z-index:1;}
+.grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.card{padding:20px;}
+.card h3{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:14px;}
+.stat-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:14px;}
+.progress{height:10px;border-radius:8px;background:rgba(255,255,255,0.07);overflow:hidden;margin-top:4px;}
+.progress > div{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--cyan),var(--green));}
+.mission-banner{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px;
+  background:linear-gradient(120deg, rgba(57,232,201,0.14), rgba(107,227,122,0.06));
+  border:1px solid var(--border);border-radius:var(--radius);flex-wrap:wrap;
+}
+.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.badge{aspect-ratio:1;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:11px;text-align:center;padding:6px;color:var(--dim);}
+.badge.earned{border-color:var(--amber);background:rgba(255,194,75,0.10);color:var(--ice);}
+.badge .ic{font-size:22px;}
+.section-title{display:flex;align-items:center;gap:10px;margin:30px 0 14px;}
+.section-title .num{font-family:'Orbitron';font-size:12px;color:var(--cyan);}
+.section-title h2{font-size:18px;}
+
+/* ============ WORLD MAP ============ */
+.map-wrap{position:relative;border-radius:24px;overflow:hidden;min-height:560px;
+  background:radial-gradient(ellipse at 30% 20%, rgba(57,232,201,0.10), transparent 55%),
+             radial-gradient(ellipse at 80% 70%, rgba(107,227,122,0.10), transparent 55%),
+             linear-gradient(160deg,#0a1a2e,#0d2b3f 55%,#0a1e1a);
+  border:1px solid var(--border);
+}
+.map-wrap svg{position:absolute;inset:0;width:100%;height:100%;opacity:0.35;}
+.loc{position:absolute;transform:translate(-50%,-50%);text-align:center;cursor:pointer;transition:transform .2s;}
+.loc:hover{transform:translate(-50%,-50%) scale(1.08);}
+.loc .dot{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;
+  background:var(--glass-strong);border:2px solid var(--cyan);box-shadow:0 0 20px rgba(57,232,201,0.4);position:relative;}
+.loc.locked .dot{border-color:rgba(255,255,255,0.15);box-shadow:none;filter:grayscale(1);opacity:0.55;}
+.loc.done .dot{border-color:var(--amber);box-shadow:0 0 18px rgba(255,194,75,0.45);}
+.loc .dot .ping{position:absolute;inset:-6px;border-radius:50%;border:1px solid var(--cyan);animation:ping 2.4s ease-out infinite;}
+.loc.locked .ping{display:none;}
+@keyframes ping{0%{transform:scale(0.9);opacity:0.7;}100%{transform:scale(1.5);opacity:0;}}
+.loc .lbl{margin-top:6px;font-size:12px;font-weight:700;background:rgba(5,9,18,0.7);padding:2px 8px;border-radius:8px;}
+
+/* ============ MISSION PLAYER ============ */
+.mission-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
+.stepper{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;}
+.step{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;background:rgba(255,255,255,0.04);color:var(--dim);border:1px solid transparent;white-space:nowrap;}
+.step.current{background:rgba(57,232,201,0.16);color:var(--cyan);border-color:var(--border);}
+.step.done{color:var(--green);}
+.scene-panel{padding:26px;margin-bottom:18px;}
+.scene-art{border-radius:14px;min-height:200px;margin-bottom:16px;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,#0d2438,#123527);border:1px solid var(--border);}
+.hotspot{position:absolute;transform:translate(-50%,-50%);}
+.hotspot button{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px dashed var(--cyan);font-size:19px;
+  display:flex;align-items:center;justify-content:center;animation:pulse 2s ease-in-out infinite;}
+.hotspot.found button{border-style:solid;background:rgba(107,227,122,0.18);border-color:var(--green);animation:none;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(57,232,201,0.35);}50%{box-shadow:0 0 0 8px rgba(57,232,201,0);}}
+.evidence-log{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+.ev-tag{font-size:12px;padding:6px 10px;border-radius:8px;background:rgba(107,227,122,0.12);border:1px solid rgba(107,227,122,0.35);color:var(--green);}
+.dialogue-box{padding:16px 18px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-left:3px solid var(--cyan);margin-bottom:10px;font-size:14.5px;line-height:1.5;}
+.dialogue-box b{color:var(--cyan);}
+
+.tool-row{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0;}
+.tool-slider{flex:1;min-width:200px;padding:14px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);}
+.tool-slider .val{font-family:'Orbitron';font-size:20px;color:var(--cyan);margin:6px 0;}
+.tool-slider input[type=range]{width:100%;accent-color:var(--cyan);}
+.sample-tabs{display:flex;gap:8px;margin-bottom:14px;}
+.sample-tabs button{padding:8px 16px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--dim);font-size:13px;font-weight:600;}
+.sample-tabs button.active{color:var(--cyan);border-color:var(--cyan);background:rgba(57,232,201,0.1);}
+.data-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px;}
+.data-table th,.data-table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+.data-table th{color:var(--dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;}
+
+/* ============ NOVA MENTOR ============ */
+#nova-fab{position:fixed;bottom:22px;right:22px;z-index:60;width:64px;height:64px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #7ffbe6, var(--cyan) 60%, #0c6e5c);
+  box-shadow:0 0 26px rgba(57,232,201,0.55), 0 6px 20px rgba(0,0,0,0.4);
+  display:flex;align-items:center;justify-content:center;font-size:26px;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+#nova-fab .rn{position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(57,232,201,0.5);animation:ping 2.5s ease-out infinite;}
+#nova-panel{position:fixed;bottom:22px;right:22px;z-index:61;width:380px;max-width:92vw;max-height:72vh;display:none;flex-direction:column;
+  border-radius:20px;overflow:hidden;}
+#nova-panel.open{display:flex;animation:fadeIn .25s ease;}
+.nova-head{display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(57,232,201,0.10);border-bottom:1px solid var(--border);}
+.nova-orb-sm{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7ffbe6,var(--cyan) 60%,#0c6e5c);flex-shrink:0;}
+.nova-head .info b{font-size:14px;display:block;}
+.nova-head .info span{font-size:11px;color:var(--dim);}
+.nova-head .close{margin-left:auto;background:none;color:var(--dim);font-size:18px;padding:4px 8px;}
+.nova-body{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.msg{max-width:88%;padding:10px 13px;border-radius:12px;font-size:13.8px;line-height:1.45;}
+.msg.nova{align-self:flex-start;background:rgba(57,232,201,0.10);border:1px solid var(--border);border-bottom-left-radius:3px;}
+.msg.you{align-self:flex-end;background:rgba(255,255,255,0.06);border-bottom-right-radius:3px;}
+.msg.typing{align-self:flex-start;color:var(--dim);font-style:italic;}
+.nova-hints{display:flex;gap:5px;padding:8px 16px;flex-wrap:wrap;border-top:1px solid var(--border);}
+.nova-hints button{font-size:11px;padding:5px 9px;border-radius:8px;background:rgba(255,194,75,0.10);border:1px solid rgba(255,194,75,0.3);color:var(--amber);}
+.nova-hints button:disabled{opacity:0.3;}
+.nova-input{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);}
+.nova-input input{flex:1;}
+.nova-input button{padding:10px 16px;border-radius:10px;}
+
+/* ============ NOTEBOOK / INVENTORY DRAWER ============ */
+.drawer-fab{position:fixed;bottom:22px;z-index:59;width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+#notebook-fab{right:98px;background:var(--glass-strong);border:1px solid var(--border);}
+#inventory-fab{right:158px;background:var(--glass-strong);border:1px solid var(--border);}
+.drawer{position:fixed;top:0;right:-420px;width:400px;max-width:90vw;height:100%;z-index:65;transition:right .3s ease;
+  background:var(--glass-strong);border-left:1px solid var(--border);backdrop-filter:blur(18px);padding:22px;overflow-y:auto;}
+.drawer.open{right:0;}
+.drawer h3{margin-bottom:16px;}
+.nb-field{margin-bottom:16px;}
+.nb-field label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);display:block;margin-bottom:6px;}
+.nb-field .content{font-size:14px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);min-height:20px;line-height:1.4;}
+.inv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.inv-item{padding:14px 8px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);text-align:center;font-size:12px;position:relative;}
+.inv-item .ic{font-size:24px;margin-bottom:6px;}
+.inv-item.equipped{border-color:var(--green);background:rgba(107,227,122,0.1);}
+.inv-item button{margin-top:6px;font-size:10px;padding:3px 8px;border-radius:6px;background:rgba(57,232,201,0.15);color:var(--cyan);}
+.drawer-close{position:absolute;top:16px;right:16px;background:none;color:var(--dim);font-size:20px;}
+
+/* ============ TOAST ============ */
+#toast-wrap{position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:8px;align-items:center;}
+.toast{padding:12px 22px;border-radius:12px;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;
+  background:rgba(15,32,56,0.92);border:1px solid var(--amber);color:var(--amber);animation:toastIn .3s ease, toastOut .3s ease 2.6s forwards;box-shadow:0 6px 24px rgba(0,0,0,0.4);}
+.toast.xp{border-color:var(--cyan);color:var(--cyan);}
+@keyframes toastIn{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-14px);}}
+
+/* ============ TEACHER / ADMIN ============ */
+.table-wrap{overflow-x:auto;}
+table.roster{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px;}
+table.roster th,table.roster td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;}
+table.roster th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.04em;}
+.tag-flag{font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(255,107,107,0.14);color:var(--coral);border:1px solid rgba(255,107,107,0.35);}
+.tag-ok{font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(107,227,122,0.14);color:var(--green);border:1px solid rgba(107,227,122,0.3);}
+.locked-note{padding:16px;border-radius:12px;background:rgba(255,194,75,0.08);border:1px solid rgba(255,194,75,0.3);font-size:13px;color:var(--amber);margin-bottom:18px;}
+
+@media(max-width:720px){
+  .grid-2,.grid-3{grid-template-columns:1fr;}
+  .role-grid{grid-template-columns:1fr;}
+  #nova-panel{width:94vw;right:3vw;bottom:14px;}
+  #notebook-fab{right:82px;}
+  #inventory-fab{right:140px;}
+}
+</style>
+</head>
+<body>
+
+<div id="toast-wrap"></div>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<section id="screen-login" class="screen active">
+  <div class="login-wrap glass">
+    <div class="logo-orbit">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="#39e8c9" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="50" cy="50" r="34" fill="none" stroke="#6be37a" stroke-width="1.5" opacity="0.4" stroke-dasharray="4 6"/>
+        <circle cx="50" cy="14" r="5" fill="#39e8c9"/>
+        <circle cx="50" cy="50" r="10" fill="url(#g1)"/>
+        <defs><radialGradient id="g1"><stop offset="0%" stop-color="#7ffbe6"/><stop offset="100%" stop-color="#0c6e5c"/></radialGradient></defs>
+      </svg>
+    </div>
+    <h1>SCIENCE MENTOR RPG</h1>
+    <p class="sub">Science Rangers · Bumi 2055</p>
+
+    <div class="role-grid" id="role-grid">
+      <div class="role-card active" data-role="student"><div class="ic">🧑‍🚀</div><div class="lbl">Siswa</div></div>
+      <div class="role-card" data-role="teacher"><div class="ic">🧑‍🏫</div><div class="lbl">Guru</div></div>
+      <div class="role-card" data-role="admin"><div class="ic">🛠️</div><div class="lbl">Admin</div></div>
+    </div>
+
+    <div class="login-form">
+      <input id="login-name" type="text" placeholder="Nama panggilan (mis. Rangga)" value="Ranger">
+      <input id="login-email" type="email" placeholder="Email sekolah" value="ranger@sekolah.id">
+      <button class="btn" id="btn-login">Masuk sebagai Science Ranger →</button>
+      <div class="login-alt">
+        <button class="btn ghost small" style="flex:1">🔵 Google Login</button>
+        <button class="btn ghost small" style="flex:1">Lupa Password?</button>
+      </div>
+    </div>
+    <p class="login-note">Prototipe demo — login ini bersifat lokal (belum tersambung Firebase/Supabase). Lihat catatan di akhir chat untuk detail cakupan.</p>
+  </div>
+</section>
+
+<!-- ============ HUD (shown once logged in) ============ -->
+<div id="hud" style="display:none;">
+  <div class="hud-avatar">🧑‍🚀</div>
+  <div>
+    <div class="hud-name" id="hud-name">Ranger</div>
+    <div class="hud-rank" id="hud-rank">Rank: Ranger Pemula · Lv. 1</div>
+  </div>
+  <div class="hud-stat">⚡<div class="bar-bg"><div class="bar-fill" id="hud-energy" style="width:100%"></div></div></div>
+  <div class="hud-stat">✨ <span id="hud-xp">0</span> XP</div>
+  <div class="hud-stat">🪙 <span id="hud-coins">120</span></div>
+  <div class="hud-nav" id="hud-nav">
+    <button data-go="dashboard" class="active">Dashboard</button>
+    <button data-go="map">Peta Dunia</button>
+    <button data-go="leaderboard">Papan Peringkat</button>
+    <button data-go="teacher" id="nav-teacher" style="display:none">Dasbor Guru</button>
+    <button data-go="admin" id="nav-admin" style="display:none">Dasbor Admin</button>
+  </div>
+</div>
+
+<!-- ============ STUDENT DASHBOARD ============ -->
+<section id="screen-dashboard" class="screen">
+  <div class="container">
+    <div class="mission-banner">
+      <div>
+        <div class="pill">MISI SAAT INI</div>
+        <h2 style="margin-top:8px;font-size:20px;">🐟 Misteri Ikan Mati — Sungai Cikapundung 2055</h2>
+        <p style="color:var(--dim);margin-top:4px;font-size:13.5px;max-width:520px;">Warga melaporkan ratusan ikan mati mengambang. Tim Science Ranger dikirim untuk investigasi sebelum krisis air meluas.</p>
+      </div>
+      <button class="btn" data-go="map">Lanjutkan Misi →</button>
+    </div>
+
+    <div class="grid-2" style="margin-top:20px;">
+      <div class="glass card">
+        <h3>Progres Belajar</h3>
+        <div class="stat-row"><span>Literasi Sains</span><b id="p-lit">20%</b></div>
+        <div class="progress"><div id="pb-lit" style="width:20%"></div></div>
+        <div class="stat-row" style="margin-top:14px;"><span>Berpikir Kritis</span><b id="p-crit">15%</b></div>
+        <div class="progress"><div id="pb-crit" style="width:15%"></div></div>
+        <div class="stat-row" style="margin-top:14px;"><span>Inkuiri Ilmiah</span><b id="p-inq">10%</b></div>
+        <div class="progress"><div id="pb-inq" style="width:10%"></div></div>
+        <div class="stat-row" style="margin-top:14px;"><span>Penggunaan Hint</span><b id="p-hint">0 kali</b></div>
+      </div>
+      <div class="glass card">
+        <h3>Lencana (Badges)</h3>
+        <div class="badge-grid" id="badge-grid"></div>
+      </div>
+    </div>
+
+    <div class="section-title"><span class="num">01</span><h2>Misi Selesai</h2></div>
+    <div class="glass card" id="completed-missions">
+      <p style="color:var(--dim);font-size:13.5px;">Belum ada misi yang selesai. Mulai eksplorasi di Peta Dunia untuk mengumpulkan bukti pertamamu.</p>
+    </div>
+
+    <div class="section-title"><span class="num">📨</span><h2>Kode Hasil untuk Guru</h2></div>
+    <div class="glass card">
+      <p style="color:var(--dim);font-size:13px;margin-bottom:10px;">Kirim kode ini ke gurumu (WhatsApp/Classroom) supaya progresmu masuk ke tabel kelas.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input id="result-code-box" readonly style="flex:1;min-width:200px;font-size:12px;">
+        <button class="btn small" id="copy-code-btn">📋 Salin Kode</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WORLD MAP ============ -->
+<section id="screen-map" class="screen">
+  <div class="container">
+    <div class="section-title"><span class="num">🌍</span><h2>Peta Dunia — Bumi 2055</h2></div>
+    <p style="color:var(--dim);font-size:13.5px;margin-bottom:16px;">Setiap lokasi menyimpan krisis lingkungan yang menunggu investigasimu. Klik simpul yang menyala untuk memulai.</p>
+    <div class="map-wrap" id="map-wrap"></div>
+  </div>
+</section>
+
+<!-- ============ MISSION: DEAD FISH MYSTERY ============ -->
+<section id="screen-mission" class="screen">
+  <div class="container">
+    <div class="mission-header">
+      <div>
+        <div class="pill">MISI 1 · SUNGAI</div>
+        <h2 style="font-size:20px;margin-top:6px;">🐟 Misteri Ikan Mati</h2>
+      </div>
+      <div class="stepper" id="stepper"></div>
+    </div>
+    <div id="mission-stage"></div>
+  </div>
+</section>
+
+<!-- ============ LEADERBOARD ============ -->
+<section id="screen-leaderboard" class="screen">
+  <div class="container">
+    <div class="section-title"><span class="num">🏆</span><h2>Papan Peringkat</h2></div>
+    <div class="sample-tabs" id="lb-tabs">
+      <button class="active" data-t="weekly">Mingguan</button>
+      <button data-t="monthly">Bulanan</button>
+      <button data-t="school">Sekolah</button>
+      <button data-t="national">Nasional</button>
+    </div>
+    <div class="glass card">
+      <table class="roster" id="lb-table"></table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TEACHER DASHBOARD ============ -->
+<section id="screen-teacher" class="screen">
+  <div class="container">
+    <div class="section-title"><span class="num">🧑‍🏫</span><h2>Dasbor Guru</h2></div>
+    <div class="locked-note">Versi ini dirancang untuk berjalan mandiri di GitHub Pages (tanpa server/database). Setiap siswa mendapat "Kode Hasil" di layar mereka setelah bermain — mereka kirim kode itu ke Anda (WhatsApp/Classroom), lalu Anda tempel di kotak bawah ini untuk menambahkannya ke tabel kelas.</div>
+
+    <div class="glass card" style="margin-bottom:18px;">
+      <h3>Tambah Kode Hasil Siswa</h3>
+      <textarea id="input-codes" placeholder="Tempel satu atau beberapa Kode Hasil di sini (satu kode per baris)..."></textarea>
+      <button class="btn small" id="btn-add-codes" style="margin-top:10px;">+ Tambahkan ke Tabel Kelas</button>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="glass card">
+        <h3>Kelas Aktif</h3>
+        <div class="stat-row"><span>VII-A · IPA Terpadu</span><span class="pill">24 siswa</span></div>
+        <div class="stat-row"><span>VII-B · IPA Terpadu</span><span class="pill">22 siswa</span></div>
+        <button class="btn ghost small" style="margin-top:10px;">+ Buat Kelas Baru</button>
+      </div>
+      <div class="glass card">
+        <h3>Pengaturan AI Mentor</h3>
+        <div class="stat-row"><span>Mode Full Hint (Level 5)</span>
+          <label style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="chk-fullhint" style="width:auto;">
+            <span id="fullhint-label" style="font-size:12px;color:var(--dim);">Nonaktif</span>
+          </label>
+        </div>
+        <p style="font-size:12px;color:var(--dim);margin-top:8px;">Saat aktif, siswa dapat membuka hint level 5 (penjelasan lengkap) di semua misi.</p>
+      </div>
+    </div>
+
+    <div class="section-title"><span class="num">02</span><h2>Progres Siswa (Data Nyata)</h2></div>
+    <p style="color:var(--dim);font-size:12.5px;margin-bottom:10px;">Tabel ini diisi otomatis dari siswa yang benar-benar login lewat link yang sama dengan Anda. Data disimpan bersama (shared) — artinya semua yang membuka link ini bisa melihat data yang sama, jadi jangan minta siswa memakai nama asli/lengkap jika Anda ingin lebih privat, gunakan nama panggilan saja.</p>
+    <div class="glass card table-wrap">
+      <table class="roster">
+        <thead><tr><th>Siswa</th><th>Misi Selesai</th><th>XP & Level</th><th>Lencana</th><th>Hint Terpakai</th><th>Catatan</th></tr></thead>
+        <tbody id="teacher-roster"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:10px;">
+      <button class="btn ghost small" id="clear-roster">🗑 Kosongkan Tabel</button>
+      <button class="btn ghost small" id="export-csv">⬇ Export Excel (CSV)</button>
+      <button class="btn ghost small" id="export-pdf-note">⬇ Export PDF</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ADMIN DASHBOARD ============ -->
+<section id="screen-admin" class="screen">
+  <div class="container">
+    <div class="section-title"><span class="num">🛠️</span><h2>Dasbor Admin</h2></div>
+    <div class="locked-note">Mode demo: pengelolaan pengguna/sekolah/misi ditampilkan sebagai contoh statis (CRUD & database sungguhan belum tersambung).</div>
+    <div class="grid-3">
+      <div class="glass card"><h3>Pengguna</h3><div style="font-size:28px;font-family:'Orbitron'">1,204</div><p style="font-size:12px;color:var(--dim);">siswa & guru terdaftar</p></div>
+      <div class="glass card"><h3>Sekolah</h3><div style="font-size:28px;font-family:'Orbitron'">18</div><p style="font-size:12px;color:var(--dim);">sekolah mitra</p></div>
+      <div class="glass card"><h3>Misi Aktif</h3><div style="font-size:28px;font-family:'Orbitron'">10</div><p style="font-size:12px;color:var(--dim);">1 lengkap, 9 dalam pengembangan</p></div>
+    </div>
+    <div class="section-title"><span class="num">03</span><h2>Manajemen Misi</h2></div>
+    <div class="glass card table-wrap">
+      <table class="roster">
+        <thead><tr><th>Misi</th><th>Lokasi</th><th>Status</th></tr></thead>
+        <tbody id="admin-missions"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NOVA MENTOR FAB + PANEL ============ -->
+<div id="nova-fab"><div class="rn"></div>🤖</div>
+<div id="nova-panel" class="glass">
+  <div class="nova-head">
+    <div class="nova-orb-sm"></div>
+    <div class="info"><b>NOVA</b><span>AI Mentor Hologram</span></div>
+    <button class="close" id="nova-close">✕</button>
+  </div>
+  <div class="nova-body" id="nova-body"></div>
+  <div class="nova-hints" id="nova-hints"></div>
+  <div class="nova-input">
+    <input id="nova-input" type="text" placeholder="Tanyakan sesuatu pada NOVA...">
+    <button class="btn small" id="nova-send">Kirim</button>
+  </div>
+</div>
+
+<!-- ============ NOTEBOOK / INVENTORY DRAWERS ============ -->
+<button class="drawer-fab" id="notebook-fab" title="Buku Catatan">📓</button>
+<button class="drawer-fab" id="inventory-fab" title="Inventaris">🎒</button>
+
+<div class="drawer glass" id="notebook-drawer">
+  <button class="drawer-close" id="notebook-close">✕</button>
+  <h3>📓 Buku Catatan Ilmiah</h3>
+  <div id="notebook-content"></div>
+</div>
+
+<div class="drawer glass" id="inventory-drawer">
+  <button class="drawer-close" id="inventory-close">✕</button>
+  <h3>🎒 Inventaris</h3>
+  <div class="inv-grid" id="inv-grid"></div>
+</div>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  role: 'student',
+  name: 'Ranger',
+  xp: 0, level: 1, coins: 120, energy: 100,
+  hintUses: 0,
+  badges: {detective:false, critical:false, datahunter:false, ecohero:false, climate:false, lab:false, obs:false, solver:false},
+  fullHintMode: false,
+  mission: {
+    stage: 0,
+    evidenceFound: [],
+    equipped: {thermometer:false, phmeter:false},
+    notebook: {observasi:'', pertanyaan:'', hipotesis:'', variabel:'', eksperimen:'', hasil:'', kesimpulan:'', refleksi:''},
+    samples: {
+      hulu:   {ph:null, suhu:null, oksigen:null, measured:false},
+      hilir:  {ph:null, suhu:null, oksigen:null, measured:false}
+    },
+    currentSample: 'hulu',
+    novaHistory: [],
+    completed: false
+  }
+};
+
+const STAGES = ['Briefing','Observasi','Pertanyaan','Hipotesis','Eksperimen','Analisis','Kesimpulan','Refleksi','Sidang Dewan AI'];
+
+/* ============================================================
+   UTIL: screens / toast / nav
+   ============================================================ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  document.querySelectorAll('#hud-nav button').forEach(b=>b.classList.toggle('active', b.dataset.go===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toast(msg, cls){
+  const t=document.createElement('div');
+  t.className='toast'+(cls?(' '+cls):'');
+  t.innerHTML=msg;
+  document.getElementById('toast-wrap').appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+function addXP(amount, reason){
+  state.xp += amount;
+  const newLevel = Math.floor(state.xp/150)+1;
+  if(newLevel>state.level){ state.level=newLevel; toast('⬆️ Naik Level! Sekarang Level '+state.level, 'xp'); }
+  toast('✨ +'+amount+' XP — '+reason, 'xp');
+  renderHUD();
+  saveStudentRecord();
+}
+function awardBadge(key,label){
+  if(state.badges[key]) return;
+  state.badges[key]=true;
+  toast('🏅 Lencana baru: '+label);
+  renderBadges();
+  saveStudentRecord();
+}
+
+/* ============ PENYIMPANAN LOKAL + KODE HASIL (untuk GitHub Pages — tanpa server/database) ============ */
+function studentSlug(){
+  return (state.name||'ranger').trim().toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0,40) || 'ranger';
+}
+function saveStudentRecord(){
+  try{
+    const record = {
+      name: state.name, xp: state.xp, level: state.level, coins: state.coins,
+      hintUses: state.hintUses, badges: state.badges,
+      missionCompleted: state.mission.completed, updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem('smrpg_'+studentSlug(), JSON.stringify(record));
+  }catch(err){ /* localStorage tidak tersedia di lingkungan ini — progres tetap jalan, hanya tidak tersimpan permanen di perangkat ini */ }
+  updateResultCodeBox();
+}
+function updateResultCodeBox(){
+  const box=document.getElementById('result-code-box');
+  if(box) box.value = generateResultCode();
+}
+function loadStudentRecordIfExists(){
+  try{
+    const raw = localStorage.getItem('smrpg_'+studentSlug());
+    if(!raw) return;
+    const rec = JSON.parse(raw);
+    state.xp=rec.xp||0; state.level=rec.level||1; state.coins=rec.coins||120;
+    state.hintUses=rec.hintUses||0; state.badges=rec.badges||state.badges;
+    state.mission.completed=!!rec.missionCompleted;
+  }catch(err){ /* abaikan jika gagal membaca */ }
+}
+function generateResultCode(){
+  const record = {
+    n: state.name, x: state.xp, l: state.level,
+    b: Object.values(state.badges).filter(Boolean).length,
+    h: state.hintUses, m: state.mission.completed?1:0, t: Date.now()
+  };
+  try{ return btoa(encodeURIComponent(JSON.stringify(record))); }catch(err){ return ''; }
+}
+function decodeResultCode(code){
+  try{ return JSON.parse(decodeURIComponent(atob(code.trim()))); }catch(err){ return null; }
+}
+function teacherStoredRecords(){
+  try{ return JSON.parse(localStorage.getItem('smrpg_teacher_roster')||'[]'); }catch(err){ return []; }
+}
+function teacherSaveRecords(list){
+  try{ localStorage.setItem('smrpg_teacher_roster', JSON.stringify(list)); }catch(err){ /* abaikan */ }
+}
+function renderTeacherTable(){
+  const tbody=document.getElementById('teacher-roster');
+  const records = teacherStoredRecords();
+  window._teacherRecords = records;
+  if(!records.length){ tbody.innerHTML=`<tr><td colspan="6" style="color:var(--dim)">Belum ada kode hasil yang ditambahkan.</td></tr>`; return; }
+  records.sort((a,b)=>(b.xp||0)-(a.xp||0));
+  tbody.innerHTML = records.map(rec=>{
+    const missionText = rec.missionCompleted || rec.m ? '1/1' : '0/1';
+    const badgeCount = rec.badgeCount!==undefined ? rec.badgeCount : (rec.b||0);
+    const hint = rec.hintUses!==undefined ? rec.hintUses : (rec.h||0);
+    const misconception = (!(rec.missionCompleted||rec.m) && hint>=4)
+      ? '<span class="tag-flag">Sering pakai hint — cek pemahaman</span>'
+      : '<span class="tag-ok">Tidak ada tanda khusus</span>';
+    return `<tr><td>${rec.name||rec.n||'(tanpa nama)'}</td><td>${missionText}</td><td>${rec.xp||rec.x||0} XP · Lv.${rec.level||rec.l||1}</td>
+      <td>${badgeCount} lencana</td><td>${hint}</td><td>${misconception}</td></tr>`;
+  }).join('');
+}
+function renderHUD(){
+  document.getElementById('hud-name').textContent = state.name;
+  document.getElementById('hud-xp').textContent = state.xp;
+  document.getElementById('hud-coins').textContent = state.coins;
+  document.getElementById('hud-energy').style.width = state.energy+'%';
+  const ranks=['Ranger Pemula','Ranger Muda','Ranger Madya','Ranger Ahli','Ranger Utama'];
+  const rankIdx=Math.min(ranks.length-1, Math.floor(state.level/2));
+  document.getElementById('hud-rank').textContent = 'Rank: '+ranks[rankIdx]+' · Lv. '+state.level;
+}
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+document.querySelectorAll('.role-card').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    document.querySelectorAll('.role-card').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+    state.role = c.dataset.role;
+  });
+});
+document.getElementById('btn-login').addEventListener('click', ()=>{
+  const nm = document.getElementById('login-name').value.trim();
+  if(nm) state.name = nm;
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('hud').style.display='flex';
+  document.getElementById('nav-teacher').style.display = state.role==='teacher' ? 'inline-block':'none';
+  document.getElementById('nav-admin').style.display = state.role==='admin' ? 'inline-block':'none';
+  if(state.role==='student') loadStudentRecordIfExists();
+  renderHUD(); renderBadges(); renderMap(); renderLeaderboard('weekly'); renderAdminMissions(); renderInventory();
+  if(state.role!=='teacher') saveStudentRecord();
+  if(state.role==='teacher'){ showScreen('teacher'); renderTeacherTable(); }
+  else if(state.role==='admin'){ showScreen('admin'); }
+  else { showScreen('dashboard'); }
+});
+document.getElementById('hud-nav').addEventListener('click', e=>{
+  if(e.target.dataset.go) showScreen(e.target.dataset.go);
+  if(e.target.dataset.go==='teacher') renderTeacherTable();
+});
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+const BADGE_DEFS = [
+  {key:'detective',ic:'🕵️',label:'Science Detective'},
+  {key:'critical',ic:'🧠',label:'Critical Thinker'},
+  {key:'datahunter',ic:'📊',label:'Data Hunter'},
+  {key:'ecohero',ic:'🌿',label:'Eco Hero'},
+  {key:'climate',ic:'🌪️',label:'Climate Warrior'},
+  {key:'lab',ic:'🧪',label:'Lab Expert'},
+  {key:'obs',ic:'🔭',label:'Observation Master'},
+  {key:'solver',ic:'🧩',label:'Problem Solver'}
+];
+function renderBadges(){
+  const grid=document.getElementById('badge-grid');
+  grid.innerHTML='';
+  BADGE_DEFS.forEach(b=>{
+    const earned=state.badges[b.key];
+    grid.innerHTML += `<div class="badge ${earned?'earned':''}"><div class="ic">${b.ic}</div><div>${b.label}</div></div>`;
+  });
+}
+
+/* ============================================================
+   WORLD MAP
+   ============================================================ */
+const LOCATIONS = [
+  {id:'river', name:'Sungai', ic:'🐟', x:22, y:62, status:'active', mission:'mission'},
+  {id:'forest', name:'Hutan', ic:'🌲', x:12, y:30, status:'locked'},
+  {id:'ocean', name:'Laut Plastik', ic:'🌊', x:70, y:22, status:'locked'},
+  {id:'climate', name:'Iklim', ic:'🌍', x:50, y:14, status:'locked'},
+  {id:'volcano', name:'Gunung Berapi', ic:'🌋', x:82, y:52, status:'locked'},
+  {id:'city', name:'Kota', ic:'🏙️', x:60, y:70, status:'locked'},
+  {id:'factory', name:'Pabrik', ic:'🏭', x:38, y:78, status:'locked'},
+  {id:'lab', name:'Laboratorium', ic:'🔬', x:88, y:80, status:'locked'},
+  {id:'power', name:'Pembangkit Energi', ic:'⚡', x:8, y:80, status:'locked'},
+  {id:'hospital', name:'Rumah Sakit', ic:'🏥', x:48, y:46, status:'locked'}
+];
+function renderMap(){
+  const wrap=document.getElementById('map-wrap');
+  wrap.innerHTML='';
+  LOCATIONS.forEach(loc=>{
+    const isDone = loc.id==='river' && state.mission.completed;
+    const el=document.createElement('div');
+    el.className='loc '+(loc.status==='locked'?'locked':'')+(isDone?' done':'');
+    el.style.left=loc.x+'%'; el.style.top=loc.y+'%';
+    el.innerHTML=`<div class="dot"><div class="ping"></div>${isDone?'⭐':loc.ic}</div><div class="lbl">${loc.name}${loc.status==='locked'?' 🔒':''}</div>`;
+    el.addEventListener('click', ()=>{
+      if(loc.status==='locked'){ toast('🔒 Lokasi ini masih terkunci — selesaikan misi sebelumnya untuk membukanya.'); return; }
+      if(loc.id==='river'){ showScreen('mission'); renderMissionStage(); }
+    });
+    wrap.appendChild(el);
+  });
+}
+
+/* ============================================================
+   LEADERBOARD (mock)
+   ============================================================ */
+function renderLeaderboard(tab){
+  const names=['Aisyah R.','Bagas P.','Citra M.','Dwi A.','Fajar S.','Gita W.','Hafiz N.','Indira L.'];
+  const table=document.getElementById('lb-table');
+  let rows='<thead><tr><th>#</th><th>Ranger</th><th>XP</th><th>Lencana</th></tr></thead><tbody>';
+  names.forEach((n,i)=>{
+    rows+=`<tr><td>${i+1}</td><td>${n}</td><td>${(900-i*70)+ (tab==='national'?400:0)}</td><td>${8-i}</td></tr>`;
+  });
+  rows+='</tbody>';
+  table.innerHTML=rows;
+}
+document.getElementById('lb-tabs').addEventListener('click', e=>{
+  if(e.target.dataset.t){
+    document.querySelectorAll('#lb-tabs button').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    renderLeaderboard(e.target.dataset.t);
+  }
+});
+
+/* ============================================================
+   TEACHER / ADMIN (mock data)
+   ============================================================ */
+function renderAdminMissions(){
+  const missions=['Misteri Ikan Mati','Lautan Plastik','Perubahan Iklim','Peringatan Gunung Berapi','Pencemaran Air','Kebakaran Hutan','Polusi Udara','Energi Terbarukan','Runtuhnya Rantai Makanan','Tantangan Global'];
+  const locs=['Sungai','Laut','Atmosfer','Gunung Berapi','Sungai','Hutan','Kota','Pembangkit','Sabana','Bumi'];
+  document.getElementById('admin-missions').innerHTML = missions.map((m,i)=>`
+    <tr><td>${m}</td><td>${locs[i]}</td><td>${i===0?'<span class="tag-ok">Aktif · Lengkap</span>':'<span class="tag-flag">Dalam pengembangan</span>'}</td></tr>`).join('');
+}
+document.getElementById('chk-fullhint').addEventListener('change', e=>{
+  state.fullHintMode = e.target.checked;
+  document.getElementById('fullhint-label').textContent = state.fullHintMode ? 'Aktif' : 'Nonaktif';
+  toast(state.fullHintMode ? '🔓 Mode Full Hint diaktifkan oleh guru' : '🔒 Mode Full Hint dinonaktifkan');
+  renderNovaHints();
+});
+document.getElementById('copy-code-btn').addEventListener('click', ()=>{
+  const box=document.getElementById('result-code-box');
+  box.select();
+  try{ document.execCommand('copy'); toast('📋 Kode disalin! Kirim ke gurumu.'); }
+  catch(err){ toast('Salin manual dari kotak teks ya.'); }
+});
+document.getElementById('btn-add-codes').addEventListener('click', ()=>{
+  const raw = document.getElementById('input-codes').value.trim();
+  if(!raw){ toast('Tempel dulu kode hasilnya ya'); return; }
+  const lines = raw.split('\\n').map(l=>l.trim()).filter(Boolean);
+  const existing = teacherStoredRecords();
+  let added=0;
+  lines.forEach(code=>{
+    const rec = decodeResultCode(code);
+    if(rec){
+      existing.push({name:rec.n, xp:rec.x, level:rec.l, badgeCount:rec.b, hintUses:rec.h, missionCompleted:!!rec.m, updatedAt:new Date(rec.t||Date.now()).toISOString()});
+      added++;
+    }
+  });
+  teacherSaveRecords(existing);
+  renderTeacherTable();
+  document.getElementById('input-codes').value='';
+  toast(added ? ('✅ '+added+' kode berhasil ditambahkan') : '⚠️ Kode tidak valid, coba salin ulang dari layar siswa');
+});
+document.getElementById('clear-roster').addEventListener('click', ()=>{
+  teacherSaveRecords([]);
+  renderTeacherTable();
+  toast('🗑 Tabel kelas dikosongkan');
+});
+document.getElementById('export-csv').addEventListener('click', ()=>{
+  const records = window._teacherRecords || [];
+  if(!records.length){ toast('Belum ada data siswa untuk diekspor.'); return; }
+  const rows=[['Siswa','Misi Selesai','XP','Level','Lencana','Hint Terpakai','Terakhir Update']];
+  records.forEach(r=>{
+    const badgeCount = r.badgeCount!==undefined ? r.badgeCount : (r.badges ? Object.values(r.badges).filter(Boolean).length : 0);
+    rows.push([r.name||'', r.missionCompleted?'1/1':'0/1', String(r.xp||0), String(r.level||1), String(badgeCount), String(r.hintUses||0), r.updatedAt||'']);
+  });
+  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='laporan_kelas.csv'; a.click();
+  toast('⬇ Laporan CSV diunduh');
+});
+document.getElementById('export-pdf-note').addEventListener('click', ()=>{
+  toast('📄 Export PDF memerlukan layanan backend — belum tersedia di prototipe ini.');
+});
+
+/* ============================================================
+   INVENTORY
+   ============================================================ */
+const INVENTORY = [
+  {key:'thermometer', ic:'🌡️', label:'Termometer', usable:true},
+  {key:'phmeter', ic:'🧪', label:'pH Meter', usable:true},
+  {key:'microscope', ic:'🔬', label:'Mikroskop', usable:false},
+  {key:'magnifier', ic:'🔍', label:'Kaca Pembesar', usable:false},
+  {key:'watertester', ic:'💧', label:'Water Tester', usable:false},
+  {key:'notebook', ic:'📓', label:'Buku Catatan', usable:false},
+  {key:'drone', ic:'🛸', label:'Drone', usable:false},
+  {key:'camera', ic:'📷', label:'Kamera', usable:false},
+  {key:'gps', ic:'🛰️', label:'GPS', usable:false}
+];
+function renderInventory(){
+  const grid=document.getElementById('inv-grid');
+  grid.innerHTML = INVENTORY.map(item=>{
+    const equipped = state.mission.equipped[item.key];
+    return `<div class="inv-item ${equipped?'equipped':''}">
+      <div class="ic">${item.ic}</div><div>${item.label}</div>
+      ${item.usable ? `<button data-eq="${item.key}">${equipped?'Terpasang ✓':'Pasang'}</button>` : ''}
+    </div>`;
+  }).join('');
+}
+document.getElementById('inv-grid').addEventListener('click', e=>{
+  const key=e.target.dataset.eq;
+  if(!key) return;
+  state.mission.equipped[key] = !state.mission.equipped[key];
+  toast(state.mission.equipped[key] ? '🎒 Alat dipasang' : '🎒 Alat dilepas');
+  renderInventory();
+  if(document.getElementById('screen-mission').classList.contains('active')) renderMissionStage();
+});
+
+/* Drawers */
+function bindDrawer(fabId, drawerId, closeId){
+  document.getElementById(fabId).addEventListener('click', ()=>document.getElementById(drawerId).classList.add('open'));
+  document.getElementById(closeId).addEventListener('click', ()=>document.getElementById(drawerId).classList.remove('open'));
+}
+bindDrawer('notebook-fab','notebook-drawer','notebook-close');
+bindDrawer('inventory-fab','inventory-drawer','inventory-close');
+document.getElementById('notebook-fab').addEventListener('click', renderNotebook);
+
+function renderNotebook(){
+  const nb=state.mission.notebook;
+  const fields=[
+    ['observasi','Observasi'],['pertanyaan','Pertanyaan Ilmiah'],['hipotesis','Hipotesis'],
+    ['variabel','Variabel'],['eksperimen','Data Eksperimen'],['hasil','Hasil'],
+    ['kesimpulan','Kesimpulan'],['refleksi','Refleksi']
+  ];
+  document.getElementById('notebook-content').innerHTML = fields.map(([k,label])=>`
+    <div class="nb-field"><label>${label}</label><div class="content">${nb[k] ? nb[k] : '<span style="color:var(--dim)">— belum diisi —</span>'}</div></div>
+  `).join('') + (state.mission.evidenceFound.length ? `
+    <div class="nb-field"><label>Bukti Terkumpul</label><div class="evidence-log">${state.mission.evidenceFound.map(e=>`<span class="ev-tag">✔ ${e}</span>`).join('')}</div></div>
+  ` : '');
+}
+
+/* ============================================================
+   NOVA — AI MENTOR (versi terscript, 100% offline — cocok untuk GitHub Pages,
+   tidak butuh koneksi API apa pun. Tetap mengikuti aturan Socratic: NOVA tidak
+   pernah memberi jawaban langsung kecuali Hint Level 5 / Mode Full Hint guru aktif.)
+   ============================================================ */
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+const NOVA_STAGE_REPLIES = {
+  0: ["Ceritakan apa yang paling menarik perhatianmu dari laporan Bu Sari tadi.", "Sebelum menyimpulkan apa pun, bukti apa yang menurutmu paling penting dicari duluan?"],
+  1: ["Bagus, teruslah amati dengan teliti. Apa yang kamu perhatikan dari warna atau kondisi airnya?", "Menurutmu, dari semua yang kamu lihat, mana yang paling mencurigakan? Kenapa?"],
+  2: ["Pertanyaan yang bagus dimulai dari sesuatu yang bisa diuji. Bagaimana caramu menguji pertanyaan itu nanti?", "Coba pikirkan: apa yang berbeda antara lokasi dekat pipa limbah dan yang jauh dari situ?"],
+  3: ["Hipotesis yang baik menghubungkan sebab dan akibat. Menurutmu, apa yang menyebabkan apa di sini?", "Kalau hipotesismu benar, data seperti apa yang seharusnya kamu temukan nanti saat eksperimen?"],
+  4: ["Perhatikan baik-baik angka pH, suhu, dan oksigen terlarut di kedua titik. Apa yang paling berbeda?", "Menurutmu, kenapa penting mengukur di dua titik yang berbeda, bukan hanya satu?"],
+  5: ["Dari bukti yang kamu pilih, apa hubungan sebab-akibat yang mulai kamu lihat?", "Apakah ada bukti yang kamu abaikan tapi mungkin sebenarnya penting?"],
+  6: ["Kesimpulan yang kuat didukung oleh data, bukan dugaan saja. Data mana yang paling mendukung kesimpulanmu?", "Coba jelaskan lagi dengan kata-katamu sendiri: apa akar masalah dari kematian ikan ini?"],
+  7: ["Refleksi yang jujur akan membantumu jadi ilmuwan yang lebih baik. Bagian mana yang paling sulit bagimu?", "Kalau kamu mengulang investigasi ini, langkah apa yang akan kamu lakukan lebih dulu?"],
+  8: ["Dewan ingin mendengar alasan ilmiahmu, bukan hanya kesimpulannya. Bisa kamu jelaskan bukti yang mendukungnya?", "Bagaimana kamu meyakinkan orang yang tidak percaya bahwa kesimpulanmu benar?"]
+};
+const NOVA_KEYWORD_REPLIES = [
+  {kw:['oksigen'], reply:"Menarik kamu menyebut oksigen. Menurutmu, dari mana asal oksigen yang terlarut di dalam air sungai?"},
+  {kw:['pupuk','limbah'], reply:"Pupuk dan limbah bisa membawa zat tertentu ke air. Kira-kira zat itu digunakan sebagai makanan oleh apa di dalam air?"},
+  {kw:['alga','ganggang','lumut'], reply:"Kalau alga tumbuh sangat banyak lalu mati, apa yang terjadi pada alga yang mati itu? Siapa yang akan menguraikannya?"},
+  {kw:['ph','asam','basa'], reply:"pH memang salah satu data penting. Tapi apakah pH sendirian bisa menjelaskan kenapa ikan sampai mati? Data apa lagi yang perlu kamu bandingkan?"},
+  {kw:['suhu','panas','dingin'], reply:"Suhu bisa memengaruhi banyak hal, termasuk seberapa banyak oksigen yang bisa larut dalam air. Sudah kamu bandingkan suhunya di dua titik?"},
+  {kw:['pabrik','industri'], reply:"Pabrik bisa jadi salah satu sumber. Tapi seorang ilmuwan tidak berhenti di satu dugaan saja — sumber lain apa yang mungkin juga berkontribusi?"},
+  {kw:['bakteri','dekomposer','penguraian','membusuk'], reply:"Kamu sudah menyentuh ide penting. Saat mikroorganisme menguraikan bahan organik, apa yang mereka pakai dari air di sekitarnya?"}
+];
+const NOVA_GENERIC = [
+  "Itu ide yang menarik. Bukti apa yang bisa mendukung pemikiranmu itu?",
+  "Coba jelaskan lebih detail — apa alasan ilmiah di balik idemu itu?",
+  "Bagus. Sekarang, apakah ada kemungkinan penjelasan lain selain itu?",
+  "Aku suka caramu berpikir. Data apa yang masih kamu butuhkan untuk memastikannya?"
+];
+const NOVA_HINTS = {
+  1: ["Coba perhatikan lagi warna dan bau air di sekitar lokasi — ada sesuatu yang berbeda dari biasanya.",
+      "Lihat lagi sekelilingmu — ada beberapa sumber yang masuk ke sungai ini, jangan lewatkan satu pun."],
+  2: ["Perhatikan baik-baik: air yang lebih hijau biasanya menandakan sesuatu tumbuh sangat banyak di dalamnya. Menurutmu apa itu?",
+      "Bandingkan kondisi air di dekat pipa limbah dengan yang jauh darinya — ada perbedaan apa?"],
+  3: ["Salah satu hal penting yang dibutuhkan makhluk hidup di air untuk bernapas adalah oksigen terlarut. Bagaimana jika kadarnya menurun drastis?",
+      "Saat alga yang tumbuh berlebihan akhirnya mati, mikroorganisme yang menguraikannya juga butuh sesuatu dari air. Menurutmu apa itu?"],
+  4: ["Coba hubungkan ini: limbah pupuk & pabrik → alga tumbuh sangat cepat (blooming) → alga mati → diuraikan bakteri → bakteri memakai banyak oksigen terlarut. Apa yang terjadi pada ikan setelah oksigen berkurang drastis?",
+      "Bandingkan angka oksigen terlarutmu di titik hulu dan hilir — perbedaan sebesar itu biasanya menunjukkan proses apa yang sedang terjadi di air?"],
+  5: "Penjelasan lengkap (Mode Full Hint dari guru): Limbah pupuk pertanian dan limbah pabrik yang masuk ke sungai membawa banyak nutrien (terutama nitrogen & fosfor). Nutrien berlebih ini menyebabkan alga tumbuh sangat cepat dan berlebihan (disebut eutrofikasi / algal bloom). Ketika alga dalam jumlah besar itu mati, bakteri pengurai (dekomposer) bekerja memecahnya, dan proses penguraian ini menghabiskan banyak oksigen terlarut dalam air. Akibatnya kadar oksigen terlarut turun drastis, sehingga ikan dan makhluk air lain kekurangan oksigen (disebut kondisi hipoksia) dan akhirnya mati."
+};
+
+function novaOpen(){ document.getElementById('nova-panel').classList.add('open'); }
+document.getElementById('nova-fab').addEventListener('click', novaOpen);
+document.getElementById('nova-close').addEventListener('click', ()=>document.getElementById('nova-panel').classList.remove('open'));
+
+function novaAddMsg(role, text){
+  const body=document.getElementById('nova-body');
+  const div=document.createElement('div');
+  div.className='msg '+(role==='nova'?'nova':'you');
+  div.textContent=text;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+function novaTypingStart(){
+  const body=document.getElementById('nova-body');
+  const div=document.createElement('div');
+  div.className='msg typing'; div.id='nova-typing';
+  div.textContent='NOVA sedang berpikir...';
+  body.appendChild(div); body.scrollTop=body.scrollHeight;
+}
+function novaTypingEnd(){ const t=document.getElementById('nova-typing'); if(t) t.remove(); }
+
+function getScriptedReply(userText, hintLevel, stage){
+  if(hintLevel===5) return NOVA_HINTS[5];
+  if(hintLevel>=1 && hintLevel<=4) return pick(NOVA_HINTS[hintLevel]);
+  const t=(userText||'').toLowerCase();
+  for(const entry of NOVA_KEYWORD_REPLIES){
+    if(entry.kw.some(k=>t.includes(k))) return entry.reply;
+  }
+  const stageReplies = NOVA_STAGE_REPLIES[stage] || NOVA_GENERIC;
+  return pick(stageReplies.concat(NOVA_GENERIC));
+}
+
+function novaSay(userText, hintLevel){
+  novaOpen();
+  if(userText) novaAddMsg('you', userText);
+  novaTypingStart();
+  const reply = getScriptedReply(userText, hintLevel||0, state.mission.stage);
+  setTimeout(()=>{
+    novaTypingEnd();
+    novaAddMsg('nova', reply);
+  }, 500 + Math.random()*500);
+}
+
+document.getElementById('nova-send').addEventListener('click', sendNovaInput);
+document.getElementById('nova-input').addEventListener('keydown', e=>{ if(e.key==='Enter') sendNovaInput(); });
+function sendNovaInput(){
+  const inp=document.getElementById('nova-input');
+  const val=inp.value.trim();
+  if(!val) return;
+  inp.value='';
+  novaSay(val, 0);
+}
+function renderNovaHints(){
+  const wrap=document.getElementById('nova-hints');
+  wrap.innerHTML='';
+  for(let lvl=1; lvl<=5; lvl++){
+    const disabled = lvl===5 && !state.fullHintMode;
+    const b=document.createElement('button');
+    b.textContent = lvl<5 ? ('Hint '+lvl) : 'Hint 5 (Guru)';
+    b.disabled = disabled;
+    b.addEventListener('click', ()=>{
+      state.hintUses++;
+      document.getElementById('p-hint').textContent = state.hintUses+' kali';
+      novaSay('', lvl);
+    });
+    wrap.appendChild(b);
+  }
+}
+renderNovaHints();
+
+/* Greet once mission stage loads first time */
+let novaGreeted=false;
+function novaGreetIfNeeded(){
+  if(novaGreeted) return; novaGreeted=true;
+  document.getElementById('nova-body').innerHTML='';
+  novaSay('Aku baru tiba di lokasi Sungai Cikapundung untuk menyelidiki laporan ikan mati. Bisa bantu aku memulai investigasi?', 0);
+}
+
+/* ============================================================
+   MISSION: DEAD FISH MYSTERY — full stage logic
+   ============================================================ */
+function setStage(n){ state.mission.stage=n; renderMissionStage(); }
+
+function renderStepper(){
+  document.getElementById('stepper').innerHTML = STAGES.map((s,i)=>
+    `<div class="step ${i===state.mission.stage?'current':(i<state.mission.stage?'done':'')}">${i+1}. ${s}</div>`
+  ).join('');
+}
+
+function renderMissionStage(){
+  renderStepper();
+  const el = document.getElementById('mission-stage');
+  const st = state.mission.stage;
+  novaGreetIfNeeded();
+
+  if(st===0){ // BRIEFING
+    el.innerHTML = `
+      <div class="glass scene-panel">
+        <div class="dialogue-box"><b>Petugas Lingkungan Ibu Sari:</b> "Ranger, tolong bantu kami! Sejak pagi tadi warga menemukan ratusan ikan mati mengambang di Sungai Cikapundung. Airnya juga tampak lebih keruh dan kehijauan dari biasanya."</div>
+        <div class="dialogue-box"><b>NOVA:</b> "Ini kasus menarik. Sebagai Science Ranger, tugasmu adalah mengumpulkan bukti dulu sebelum menyimpulkan apa pun. Yuk kita observasi lokasi kejadian."</div>
+        <button class="btn" onclick="setStage(1)">Mulai Observasi Lapangan →</button>
+      </div>`;
+    return;
+  }
+
+  if(st===1){ // OBSERVASI
+    const hotspots=[
+      {id:'fish', x:30, y:60, ic:'🐟', label:'Ikan mati mengambang'},
+      {id:'water', x:55, y:40, ic:'🟢', label:'Air keruh kehijauan'},
+      {id:'pipe', x:78, y:65, ic:'🏭', label:'Pipa limbah pabrik'},
+      {id:'farm', x:15, y:25, ic:'🌾', label:'Sawah dengan pupuk'}
+    ];
+    el.innerHTML = `
+      <div class="glass scene-panel">
+        <p style="color:var(--dim);font-size:13.5px;margin-bottom:10px;">Klik setiap objek di lokasi untuk mengumpulkan bukti observasi.</p>
+        <div class="scene-art" id="scene-art"></div>
+        <div class="evidence-log" id="obs-evidence"></div>
+        <div style="margin-top:16px;">
+          <button class="btn" id="btn-to-question" disabled>Lanjut ke Tahap Bertanya →</button>
+        </div>
+      </div>`;
+    const art=document.getElementById('scene-art');
+    hotspots.forEach(h=>{
+      const found = state.mission.evidenceFound.includes(h.label);
+      const div=document.createElement('div');
+      div.className='hotspot'+(found?' found':'');
+      div.style.left=h.x+'%'; div.style.top=h.y+'%';
+      div.innerHTML=`<button title="${h.label}">${h.ic}</button>`;
+      div.querySelector('button').addEventListener('click', ()=>{
+        if(!state.mission.evidenceFound.includes(h.label)){
+          state.mission.evidenceFound.push(h.label);
+          addXP(10,'Observasi: '+h.label);
+          div.classList.add('found');
+          renderObsEvidence();
+          if(state.mission.evidenceFound.length===hotspots.length){
+            awardBadge('obs','Observation Master');
+            document.getElementById('btn-to-question').disabled=false;
+          }
+        }
+      });
+      art.appendChild(div);
+    });
+    renderObsEvidence();
+    function renderObsEvidence(){
+      document.getElementById('obs-evidence').innerHTML = state.mission.evidenceFound.map(e=>`<span class="ev-tag">✔ ${e}</span>`).join('');
+      state.mission.notebook.observasi = state.mission.evidenceFound.join('; ');
+    }
+    document.getElementById('btn-to-question').addEventListener('click', ()=>setStage(2));
+    return;
+  }
+
+  if(st===2){ // PERTANYAAN
+    el.innerHTML = `
+      <div class="glass scene-panel">
+        <div class="dialogue-box"><b>NOVA:</b> "Bagus, kamu sudah kumpulkan beberapa bukti. Sekarang, pertanyaan ilmiah apa yang muncul di benakmu dari observasi tadi? Tanyakan sesuatu yang bisa diuji, bukan sekadar 'kenapa ikan mati'."</div>
+        <textarea id="input-question" placeholder="Tulis pertanyaan ilmiahmu di sini... (mis. Apakah kadar oksigen di air berhubungan dengan kematian ikan?)"></textarea>
+        <div style="margin-top:12px;display:flex;gap:10px;">
+          <button class="btn ghost small" id="ask-nova-q">Tanyakan ke NOVA dulu</button>
+          <button class="btn" id="btn-to-hypothesis">Simpan & Lanjut ke Hipotesis →</button>
+        </div>
+      </div>`;
+    document.getElementById('ask-nova-q').addEventListener('click', ()=>{
+      const v=document.getElementById('input-question').value.trim();
+      novaSay(v || 'Aku belum yakin pertanyaan ilmiah apa yang tepat untuk kasus ini.', 0);
+    });
+    document.getElementById('btn-to-hypothesis').addEventListener('click', ()=>{
+      const v=document.getElementById('input-question').value.trim();
+      if(!v){ toast('✍️ Tulis dulu pertanyaanmu ya'); return; }
+      state.mission.notebook.pertanyaan = v;
+      setStage(3);
+    });
+    return;
+  }
+
+  if(st===3){ // HIPOTESIS
+    el.innerHTML = `
+      <div class="glass scene-panel">
+        <div class="dialogue-box"><b>NOVA:</b> "Sekarang buat hipotesis — dugaan sementara yang bisa kamu uji lewat eksperimen. Ingat, hipotesis yang baik menghubungkan sebab dan akibat."</div>
+        <textarea id="input-hypothesis" placeholder="Tulis hipotesismu... (mis. Jika limbah pupuk masuk ke sungai, maka kadar oksigen terlarut akan menurun dan menyebabkan ikan mati)"></textarea>
+        <div style="margin-top:12px;display:flex;gap:10px;">
+          <button class="btn ghost small" id="ask-nova-h">Minta Umpan Balik NOVA</button>
+          <button class="btn" id="btn-to-experiment">Simpan & Lanjut ke Eksperimen →</button>
+        </div>
+      </div>`;
+    document.getElementById('ask-nova-h').addEventListener('click', ()=>{
+      const v=document.getElementById('input-hypothesis').value.trim();
+      novaSay('Ini hipotesisku: '+(v||'(kosong)'), 0);
+    });
+    document.getElementById('btn-to-experiment').addEventListener('click', ()=>{
+      const v=document.getElementById('input-hypothesis').value.trim();
+      if(!v){ toast('✍️ Tulis dulu hipotesismu ya'); return; }
+      state.mission.notebook.hipotesis = v;
+      addXP(30,'Hipotesis dirumuskan');
+      setStage(4);
+    });
+    return;
+  }
+
+  if(st===4){ // EKSPERIMEN
+    const needTools = !state.mission.equipped.thermometer || !state.mission.equipped.phmeter;
+    el.innerHTML = `
+      <div class="glass scene-panel">
+        <div class="dialogue-box"><b>NOVA:</b> "Untuk menguji hipotesismu, ukur kualitas air di dua titik: hulu (sebelum pipa limbah) dan hilir (setelah pipa limbah). Pasang Termometer & pH Meter dari inventaris (🎒) dulu."</div>
+        ${needTools ? `<p style="color:var(--amber);font-size:13px;margin-bottom:10px;">⚠️ Alat belum lengkap. Buka Inventaris dan pasang Termometer + pH Meter.</p>` : ''}
+        <div class="sample-tabs" id="sample-tabs">
+          <button class="${state.mission.currentSample==='hulu'?'active':''}" data-s="hulu">Titik Hulu</button>
+          <button class="${state.mission.currentSample==='hilir'?'active':''}" data-s="hilir">Titik Hilir</button>
+        </div>
+        <div class="tool-row">
+          <div class="tool-slider"><label>🌡️ Suhu (°C)</label><div class="val" id="val-suhu">28</div><input type="range" min="20" max="40" value="28" id="slider-suhu" ${needTools?'disabled':''}></div>
+          <div class="tool-slider"><label>🧪 pH</label><div class="val" id="val-ph">7.0</div><input type="range" min="40" max="90" value="70" id="slider-ph" ${needTools?'disabled':''}></div>
+        </div>
+        <button class="btn ${needTools?'ghost':''}" id="btn-measure" ${needTools?'disabled':''}>📏 Ukur & Catat Data Oksigen Terlarut</button>
+        <table class="data-table" id="data-table" style="margin-top:16px;"></table>
+        <button class="btn" id="btn-to-analysis" style="margin-top:16px;" disabled>Lanjut ke Analisis →</button>
+      </div>`;
+    document.getElementById('sample-tabs').addEventListener('click', e=>{
+      if(e.target.dataset.s){ state.mission.currentSample=e.target.dataset.s; renderMissionStage(); }
+    });
+    const sSuhu=document.getElementById('slider-suhu'), sPh=document.getElementById('slider-ph');
+    if(sSuhu){ sSuhu.addEventListener('input', ()=>document.getElementById('val-suhu').textContent=sSuhu.value); }
+    if(sPh){ sPh.addEventListener('input', ()=>document.getElementById('val-ph').textContent=(sPh.value/10).toFixed(1)); }
+    updateDataTable();
+    const measureBtn=document.getElementById('btn-measure');
+    if(measureBtn) measureBtn.addEventListener('click', ()=>{
+      const key=state.mission.currentSample;
+      const suhu = Number(sSuhu.value);
+      const ph = Number(sPh.value)/10;
+      // simulate realistic DO based on sample point (hilir near pollution = lower DO, warmer, more acidic-ish from decomposition)
+      const oksigen = key==='hilir' ? (2.5 + Math.random()*0.8).toFixed(1) : (7.5 + Math.random()*0.8).toFixed(1);
+      state.mission.samples[key] = {ph, suhu, oksigen: Number(oksigen), measured:true};
+      addXP(10,'Data terukur di titik '+key);
+      updateDataTable();
+      if(state.mission.samples.hulu.measured && state.mission.samples.hilir.measured){
+        awardBadge('lab','Lab Expert');
+        awardBadge('datahunter','Data Hunter');
+        document.getElementById('btn-to-analysis').disabled=false;
+      }
+    });
+    function updateDataTable(){
+      const t=document.getElementById('data-table');
+      const h=state.mission.samples.hulu, l=state.mission.samples.hilir;
+      t.innerHTML = `<tr><th>Titik</th><th>Suhu (°C)</th><th>pH</th><th>Oksigen Terlarut (mg/L)</th></tr>
+      <tr><td>Hulu</td><td>${h.measured?h.suhu:'—'}</td><td>${h.measured?h.ph:'—'}</td><td>${h.measured?h.oksigen:'—'}</td></tr>
+      <tr><td>Hilir</td><td>${l.measured?l.suhu:'—'}</td><td>${l.measured?l.ph:'—'}</td><td>${l.measured?l.oksigen:'—'}</td></tr>`;
+      state.mission.notebook.eksperimen = `Hulu: suhu ${h.measured?h.suhu:'-'}°C, pH ${h.measured?h.ph:'-'}, O2 ${h.measured?h.oksigen:'-'} mg/L | Hilir: suhu ${l.measured?l.suhu:'-'}°C, pH ${l.measured?l.ph:'-'}, O2 ${l.measured?l.oksigen:'-'} mg/L`;
+    }
+    document.getElementById('btn-to-analysis').addEventListener('click', ()=>setStage(5));
+    return;
+  }
+
+  if(st===5){ // ANALISIS
+    const h=state.mission.samples.hulu, l=state.mission.samples.hilir;
+    const cards = [
+      {id:'c1', text:'Oksigen terlarut jauh lebih rendah di titik hilir dibanding hulu'},
+      {id:'c2', text:'Air di dekat pipa limbah tampak keruh kehijauan (indikasi ledakan alga)'},
+      {id:'c3', text:'Ada sawah dengan pupuk & pipa limbah pabrik di area hulu-hilir'},
+      {id:'c4', text:'Suhu air relatif sama di kedua titik'}
+    ];
+    el.innerHTML = `
+      <div class="glass scene-panel">
+        <div class="dialogue-box"><b>NOVA:</b> "Sekarang saatnya menganalisis. Dari bukti dan data yang kamu kumpulkan, pilih bukti-bukti yang PALING mendukung hipotesismu tentang penyebab ikan mati."</div>
+        <div id="analysis-cards" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+          ${cards.map(c=>`<label style="display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);cursor:pointer;">
+            <input type="checkbox" data-c="${c.id}" style="width:auto;margin-top:3px;"><span style="font-size:13.5px;">${c.text}</span></label>`).join('')}
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;">
+          <button class="btn ghost small" id="ask-nova-analysis">Diskusikan dengan NOVA</button>
+          <button class="btn" id="btn-to-conclusion">Lanjut ke Kesimpulan →</button>
+        </div>
+      </div>`;
+    document.getElementById('ask-nova-analysis').addEventListener('click', ()=>{
+      novaSay('Aku melihat oksigen terlarut di hilir ('+l.oksigen+' mg/L) jauh lebih rendah dari hulu ('+h.oksigen+' mg/L). Apa artinya ini?', 0);
+    });
+    document.getElementById('btn-to-conclusion').addEventListener('click', ()=>{
+      const checked = Array.from(document.querySelectorAll('#analysis-cards input:checked')).length;
+      if(checked<2){ toast('🔎 Pilih minimal 2 bukti pendukung dulu'); return; }
+      addXP(20,'Analisis bukti selesai');
+      awardBadge('critical','Critical Thinker');
+      setStage(6);
+    });
+    return;
+  }
+
+  if(st===6){ // KESIMPULAN
+    el.innerHTML = `
+      <div class="glass scene-panel">
+        <div class="dialogue-box"><b>NOVA:</b> "Berdasarkan semua observasi, hipotesis, dan data eksperimenmu — tulis kesimpulan ilmiahmu tentang penyebab kematian ikan di sungai ini."</div>
+        <textarea id="input-conclusion" placeholder="Tulis kesimpulanmu di sini..."></textarea>
+        <div style="margin-top:12px;display:flex;gap:10px;">
+          <button class="btn ghost small" id="ask-nova-c">Minta NOVA Menilai Argumenku</button>
+          <button class="btn" id="btn-to-reflection">Simpan & Lanjut ke Refleksi →</button>
+        </div>
+      </div>`;
+    document.getElementById('ask-nova-c').addEventListener('click', ()=>{
+      const v=document.getElementById('input-conclusion').value.trim();
+      novaSay('Ini kesimpulanku: '+(v||'(kosong)')+'. Apakah argumenku cukup kuat?', 0);
+    });
+    document.getElementById('btn-to-reflection').addEventListener('click', ()=>{
+      const v=document.getElementById('input-conclusion').value.trim();
+      if(!v){ toast('✍️ Tulis dulu kesimpulanmu ya'); return; }
+      state.mission.notebook.kesimpulan = v;
+      addXP(40,'Argumen kesimpulan disusun');
+      awardBadge('ecohero','Eco Hero');
+      awardBadge('detective','Science Detective');
+      setStage(7);
+    });
+    return;
+  }
+
+  if(st===7){ // REFLEKSI
+    el.innerHTML = `
+      <div class="glass scene-panel">
+        <div class="dialogue-box"><b>NOVA:</b> "Terakhir, refleksikan proses investigasimu. Apa yang paling menantang? Apa yang akan kamu lakukan berbeda jika mengulang investigasi ini?"</div>
+        <textarea id="input-reflection" placeholder="Tulis refleksimu..."></textarea>
+        <button class="btn" id="btn-to-council" style="margin-top:12px;">Simpan & Hadapi Dewan AI →</button>
+      </div>`;
+    document.getElementById('btn-to-council').addEventListener('click', ()=>{
+      const v=document.getElementById('input-reflection').value.trim();
+      if(!v){ toast('✍️ Tulis dulu refleksimu ya'); return; }
+      state.mission.notebook.refleksi = v;
+      awardBadge('solver','Problem Solver');
+      setStage(8);
+    });
+    return;
+  }
+
+  if(st===8){ // SIDANG DEWAN AI
+    el.innerHTML = `
+      <div class="glass scene-panel">
+        <div class="dialogue-box"><b>Dewan AI Sains (NOVA):</b> "Ranger, saatnya mempertanggungjawabkan laporan ilmiahmu di hadapan Dewan. Aku akan bertanya seperti penguji — jawab dengan alasan ilmiahmu sendiri."</div>
+        <textarea id="input-defense" placeholder="Jelaskan mengapa kesimpulanmu tentang penyebab kematian ikan ini masuk akal secara ilmiah..."></textarea>
+        <div style="margin-top:12px;display:flex;gap:10px;">
+          <button class="btn ghost small" id="ask-council">Ajukan ke Dewan</button>
+          <button class="btn amber" id="btn-finish">🎉 Selesaikan Misi</button>
+        </div>
+      </div>`;
+    document.getElementById('ask-council').addEventListener('click', ()=>{
+      const v=document.getElementById('input-defense').value.trim();
+      novaSay('Pembelaanku di hadapan Dewan: '+(v||'(kosong)'), 0);
+    });
+    document.getElementById('btn-finish').addEventListener('click', finishMission);
+    return;
+  }
+}
+
+function finishMission(){
+  if(state.mission.completed) return;
+  state.mission.completed = true;
+  addXP(100,'Misi Selesai: Misteri Ikan Mati');
+  state.coins += 50;
+  document.getElementById('hud-coins').textContent = state.coins;
+  document.getElementById('p-lit').textContent='72%'; document.getElementById('pb-lit').style.width='72%';
+  document.getElementById('p-crit').textContent='68%'; document.getElementById('pb-crit').style.width='68%';
+  document.getElementById('p-inq').textContent='60%'; document.getElementById('pb-inq').style.width='60%';
+  document.getElementById('completed-missions').innerHTML = `
+    <div class="mission-banner">
+      <div><div class="pill">SELESAI ⭐</div><h2 style="font-size:16px;margin-top:6px;">🐟 Misteri Ikan Mati</h2>
+      <p style="color:var(--dim);font-size:13px;">Penyebab: eutrofikasi akibat limbah pupuk & pabrik → ledakan alga → oksigen terlarut turun → ikan mati.</p></div>
+      <div class="pill">+100 XP · 4 Lencana</div>
+    </div>`;
+  toast('🎉 Misi "Misteri Ikan Mati" selesai! Lokasi baru mungkin akan terbuka di update berikutnya.');
+  setTimeout(()=>{ showScreen('dashboard'); renderMap(); }, 1200);
+}
+
+/* init small things */
+document.getElementById('p-hint').textContent = state.hintUses+' kali';
+</script>
+</body>
+</html>
